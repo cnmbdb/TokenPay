@@ -1,0 +1,27 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0.424 AS build
+WORKDIR /src
+COPY global.json ./
+COPY src/TokenPay/TokenPay.csproj ./TokenPay/
+RUN dotnet restore ./TokenPay/TokenPay.csproj
+COPY src/TokenPay/ ./TokenPay/
+RUN dotnet publish ./TokenPay/TokenPay.csproj --configuration Release --no-restore --output /out
+RUN cp ./TokenPay/appsettings.Example.json /out/appsettings.json \
+    && cp ./TokenPay/EVMChains.Example.json /out/EVMChains.json \
+    && sed -i \
+       -e 's|"TRON": \[ "TKGTx4pCKiKQbk8evXHTborfZn754TGViP" \]|"TRON": []|' \
+       -e 's|"EVM": \[ "0x9966aA2f1dDD7c1174553e687791a96c1Bc20680" \]|"EVM": []|' \
+       -e 's|"TRON-PRO-API-KEY": "xxxxxx-xxxx-xxxx-xxxxxxxxxxxx"|"TRON-PRO-API-KEY": ""|' \
+       -e 's|"ApiToken": "666666"|"ApiToken": ""|' \
+       -e 's|"WebSiteUrl": "http://token-pay.xxxxx.com"|"WebSiteUrl": ""|' \
+       -e 's|"BotToken": "1234567890:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"|"BotToken": ""|' \
+       -e 's|"Address": "TKGTx4pCKiKQbk8evXHTborfZn754TGViP"|"Address": ""|' \
+       /out/appsettings.json
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+COPY --from=build /out/ ./
+RUN mkdir -p /app/data && chmod 700 /app/data
+ENV TZ=Asia/Shanghai
+ENV ConnectionStrings__DB="Data Source=/app/data/TokenPay.db;"
+EXPOSE 8080
+CMD ["sh", "-c", "exec dotnet TokenPay.dll --urls http://0.0.0.0:${PORT:-8080}"]

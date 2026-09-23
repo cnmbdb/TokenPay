@@ -66,6 +66,11 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownProxies.Add(IPAddress.Loopback);
     options.KnownProxies.Add(IPAddress.IPv6Loopback);
     options.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(IPAddress.Parse("172.16.0.0"), 12));
+    // Railway routes public HTTPS requests through its internal proxy network.
+    if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("RAILWAY_SERVICE_ID")))
+    {
+        options.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(IPAddress.Parse("100.64.0.0"), 10));
+    }
 });
 var Configuration = builder.Configuration;
 Configuration.AddJsonFile("EVMChains.json", optional: true, reloadOnChange: true);

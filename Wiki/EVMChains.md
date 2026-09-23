@@ -4,8 +4,7 @@
 
 EVM 链列表在应用启动时加载，修改此文件后需要重启 TokenPay。
 
-Railway Variables 的 RAW Editor 可用仓库中的 [railway-overrides.env.example](railway-overrides.env.example) 覆盖链配置。变量名去掉 TOKENPAY_OVERRIDE__ 前缀后，双下划线表示配置层级。例如，TOKENPAY_OVERRIDE__EVMChains__0__ApiKey 对应 EVMChains:0:ApiKey，TOKENPAY_OVERRIDE__EVMChains__0__ERC20__0__ContractAddress 对应第一条链第一个代币的合约地址。数组索引从 0 开始，并按现有 EVMChains.json 的链和代币顺序对应。空变量会被忽略，JSON 值作为回退；设置非空覆盖值后需重启应用。
-
+Railway 镜像内含基于 `EVMChains.Example.json` 的默认配置，示例链默认关闭，因此无需把整份 JSON 放进 Variables。需要启用某条链时，先为该链设置 `TOKENPAY_OVERRIDE__EVMChains__N__ApiKey` 和 `TOKENPAY_OVERRIDE__EVMChains__N__Enable=true`（N 为该链索引）；其余字段可继续使用镜像默认值，也可按需覆盖。索引从 0 开始，按镜像内 `EVMChains.json` 的顺序对应。生产环境启用链前必须提供有效的 Etherscan V2 API Key。RAW Editor 的变量示例见 [railway-overrides.env.example](railway-overrides.env.example)。链配置在应用启动时载入，修改后需要重新部署。
 
 ## 链配置字段
 

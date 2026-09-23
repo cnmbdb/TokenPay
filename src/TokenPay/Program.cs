@@ -77,6 +77,20 @@ Configuration.AddJsonFile("EVMChains.json", optional: true, reloadOnChange: true
 if (!builder.Environment.IsProduction())
     Configuration.AddJsonFile($"EVMChains.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
+// Railway-compatible overrides: TOKENPAY_OVERRIDE__Rate__USDT maps to Rate:USDT.
+// Ignore blank entries so an editable .env template never erases values in the JSON files.
+const string overridePrefix = "TOKENPAY_OVERRIDE:";
+var environmentOverrides = Configuration
+    .GetSection("TOKENPAY_OVERRIDE")
+    .AsEnumerable()
+    .Where(entry => entry.Key.StartsWith(overridePrefix, StringComparison.OrdinalIgnoreCase)
+        && !string.IsNullOrWhiteSpace(entry.Value))
+    .ToDictionary(
+        entry => entry.Key[overridePrefix.Length..],
+        entry => (string?)entry.Value,
+        StringComparer.OrdinalIgnoreCase);
+Configuration.AddInMemoryCollection(environmentOverrides);
+
 QueryTronAction.configuration = Configuration;
 
 var EVMChains = Configuration.GetSection("EVMChains").Get<List<EVMChain>>() ?? new List<EVMChain>();

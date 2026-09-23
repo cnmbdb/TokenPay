@@ -15,6 +15,13 @@
 
 不要把包含真实密钥、机器人 Token、钱包地址私钥或管理员密码哈希的配置文件提交到公开仓库。
 
+## Railway .env 覆盖项
+
+Railway Variables 的 RAW Editor 可使用仓库中的 [railway-overrides.env.example](railway-overrides.env.example) 作为可选覆盖项模板。变量名去掉 TOKENPAY_OVERRIDE__ 前缀后，双下划线 __ 会映射为配置层级分隔符。例如，TOKENPAY_OVERRIDE__Address__TRON__0 对应 Address:TRON:0，TOKENPAY_OVERRIDE__Telegram__AdminUserId 对应 Telegram:AdminUserId，TOKENPAY_OVERRIDE__TRON-PRO-API-KEY 对应 TRON-PRO-API-KEY。
+
+空值会被忽略，现有 JSON 配置继续生效；填入非空值后，该值覆盖 JSON。当前 Railway 中已有的 ApiToken、WebSiteUrl、ConnectionStrings__DB 和 Admin__... 变量继续按原名称使用。修改启动配置后需要重新部署。
+
+
 ## 支付页主题切换(主题均支持中英文)
 >见配置文件末尾`ThemeName`字段，目前内置了五套支付页风格，都带有中文、英文两个语言。
 - 此字段留空则使用默认经典页面
